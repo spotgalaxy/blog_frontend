@@ -251,9 +251,9 @@ watch(tocCollapsed, (v) => {
 
         <div class="foot-share">
           <span class="foot-label font-serif-warm">分享：</span>
-          <a :href="shareUrl" target="_blank" rel="noopener" class="share-link font-serif-warm">
+          <!-- <a :href="shareUrl" target="_blank" rel="noopener" class="share-link font-serif-warm">
             分享到 Twitter
-          </a>
+          </a> -->
           <button class="share-link font-serif-warm" @click="copyLink">
             {{ copied ? '已复制 ✓' : '复制链接' }}
           </button>
