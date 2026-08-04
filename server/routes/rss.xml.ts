@@ -13,8 +13,14 @@ function escapeXml(str: string): string {
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
-  const res = await $fetch<{ code: number; data: Array<{ slug: string; title: string; summary: string; publishedAt: string | null }> }>(`${config.apiBase}/api/posts`)
-  const posts = res.data
+
+  let posts: Array<{ slug: string; title: string; summary: string; publishedAt: string | null }> = []
+  try {
+    const res = await $fetch<{ code: number; data: Array<{ slug: string; title: string; summary: string; publishedAt: string | null }> }>(`${config.apiBase}/api/posts`)
+    posts = res?.data ?? []
+  } catch (err) {
+    console.warn('[rss.xml] 获取文章列表失败，已生成空 feed：', err)
+  }
 
   const items = posts
     .filter((p) => p.publishedAt)
