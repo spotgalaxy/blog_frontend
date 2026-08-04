@@ -34,3 +34,4 @@ coverage/
 # Local dev temp
 .tmp/
 .temp/
+.workbuddy/
