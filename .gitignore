@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Nuxt build / generated output
+.nuxt/
+.output/
+.data/
+.cache/
+.nuxtrc
+
+# Env / secrets（含数据库密码、JWT 密钥等敏感信息）
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# TypeScript / coverage
+*.tsbuildinfo
+coverage/
+
+# Local dev temp
+.tmp/
+.temp/

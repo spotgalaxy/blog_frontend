@@ -1,0 +1,389 @@
+/* ============================================================
+   Personal Blog Design System — Warm Literary (暖米文艺风)
+   Brand prefix: blog
+   ============================================================ */
+
+:root {
+  /* Brand — warm brick / ochre */
+  --blog-primary: #b45309;
+  --blog-primary-foreground: #faf7f2;
+
+  /* Surfaces — warm rice paper */
+  --blog-background: #faf7f2;
+  --blog-foreground: #2a241e;
+  --blog-muted: #f0ebe1;
+  --blog-muted-foreground: #78716c;
+  --blog-card: #fdfcf9;
+  --blog-card-foreground: #2a241e;
+  --blog-border: #e7dfd3;
+  --blog-input: #e7dfd3;
+  --blog-ring: #b45309;
+
+  /* Accent — warm amber */
+  --blog-accent: #fef3c7;
+  --blog-accent-foreground: #92400e;
+
+  /* Radius scale */
+  --blog-radius-sm: 2px;
+  --blog-radius-md: 4px;
+  --blog-radius-lg: 6px;
+
+  /* Typography */
+  --blog-font-serif: Georgia, 'Songti SC', 'SimSun', 'Noto Serif SC', serif;
+  --blog-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', Roboto, sans-serif;
+  --blog-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* Spacing baseline: 8px grid */
+  --blog-space-1: 4px;
+  --blog-space-2: 8px;
+  --blog-space-3: 12px;
+  --blog-space-4: 16px;
+  --blog-space-6: 24px;
+  --blog-space-8: 32px;
+  --blog-space-12: 48px;
+  --blog-space-16: 64px;
+  --blog-space-20: 80px;
+
+  /* Content widths — magazine narrow */
+  --blog-content-narrow: 640px;
+  --blog-content-wide: 960px;
+}
+
+/* ============ Dark theme — deep warm brown ============ */
+html.dark {
+  --blog-background: #2a241e;
+  --blog-foreground: #f5f0e8;
+  --blog-muted: #3a3128;
+  --blog-muted-foreground: #a8a29e;
+  --blog-card: #322b24;
+  --blog-card-foreground: #f5f0e8;
+  --blog-border: #4a3f33;
+  --blog-input: #4a3f33;
+  --blog-ring: #d97706;
+  --blog-primary: #d97706;
+  --blog-primary-foreground: #2a241e;
+  --blog-accent: #78350f;
+  --blog-accent-foreground: #fef3c7;
+}
+
+/* ============ Base ============ */
+html {
+  font-family: var(--blog-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.8;
+  color: var(--blog-foreground);
+  background: var(--blog-background);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--blog-background);
+  color: var(--blog-foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+figure,
+blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--blog-font-mono);
+}
+
+::selection {
+  background: var(--blog-primary);
+  color: var(--blog-primary-foreground);
+}
+
+/* ============ Literary custom styles ============ */
+.font-serif-warm {
+  font-family: var(--blog-font-serif);
+}
+
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--blog-font-serif);
+  font-size: 3.5rem;
+  line-height: 0.9;
+  padding-right: 0.5rem;
+  padding-top: 0.3rem;
+  color: var(--blog-primary);
+  font-weight: 600;
+}
+
+.quote-mark::before {
+  content: '\201C';
+  font-family: var(--blog-font-serif);
+  font-size: 4rem;
+  line-height: 0;
+  color: var(--blog-primary);
+  opacity: 0.3;
+  vertical-align: -0.4em;
+  margin-right: 0.1em;
+}
+
+.dotted-divider {
+  border: none;
+  border-top: 1px dotted var(--blog-border);
+}
+
+.signature {
+  font-family: var(--blog-font-serif);
+  font-style: italic;
+}
+
+.underline-deco {
+  position: relative;
+  display: inline-block;
+}
+.underline-deco::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 40%;
+  height: 2px;
+  background: var(--blog-primary);
+}
+
+.magazine-section-title {
+  font-family: var(--blog-font-serif);
+  letter-spacing: 0.05em;
+}
+
+.deco-line {
+  width: 48px;
+  height: 1px;
+  background: var(--blog-primary);
+}
+
+.project-num {
+  font-family: var(--blog-font-serif);
+  font-size: 0.875rem;
+  letter-spacing: 0.15em;
+  color: var(--blog-primary);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Article typography (Markdown body)
+   ============================================================ */
+.article-content {
+  font-family: var(--blog-font-serif);
+}
+
+.article-content p {
+  margin-bottom: 1.5rem;
+  line-height: 1.9;
+  color: var(--blog-foreground);
+}
+
+.article-content h2 {
+  font-family: var(--blog-font-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 3rem;
+  margin-bottom: 1.25rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--blog-primary);
+  color: var(--blog-foreground);
+  line-height: 1.4;
+}
+
+.article-content h3 {
+  font-family: var(--blog-font-serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.85rem;
+  color: var(--blog-foreground);
+}
+
+.article-content h4 {
+  font-family: var(--blog-font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  color: var(--blog-foreground);
+}
+
+.article-content blockquote {
+  margin: 2rem 0;
+  padding: 1.25rem 1.75rem;
+  border-left: 3px solid var(--blog-primary);
+  background: var(--blog-muted);
+  font-style: italic;
+  font-family: var(--blog-font-serif);
+  font-size: 1.05rem;
+  color: var(--blog-foreground);
+  line-height: 1.9;
+  border-radius: 0 var(--blog-radius-sm) var(--blog-radius-sm) 0;
+}
+
+.article-content blockquote p {
+  margin: 0;
+}
+
+.article-content pre {
+  margin: 1.75rem 0;
+  padding: 1.25rem 1.5rem;
+  background: var(--blog-muted);
+  border: 1px solid var(--blog-border);
+  border-radius: var(--blog-radius-sm);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  position: relative;
+}
+
+.article-content code {
+  font-family: var(--blog-font-mono);
+  font-size: 0.875em;
+  background: var(--blog-muted);
+  color: var(--blog-primary);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--blog-radius-sm);
+  border: 1px solid var(--blog-border);
+}
+
+.article-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--blog-foreground);
+  font-size: 100%;
+}
+
+.article-content ul {
+  margin: 1.25rem 0 1.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.article-content ul li {
+  margin-bottom: 0.6rem;
+  line-height: 1.8;
+  list-style-type: square;
+  color: var(--blog-foreground);
+}
+
+.article-content ul li::marker {
+  color: var(--blog-primary);
+}
+
+.article-content ol {
+  margin: 1.25rem 0 1.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.article-content ol li {
+  margin-bottom: 0.6rem;
+  line-height: 1.8;
+  list-style-type: decimal;
+  color: var(--blog-foreground);
+}
+
+.article-content ol li::marker {
+  color: var(--blog-primary);
+}
+
+.article-content img {
+  width: 100%;
+  border-radius: var(--blog-radius-sm);
+  margin: 1.75rem 0 0.75rem 0;
+}
+
+.article-content .figure-caption {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--blog-muted-foreground);
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.article-content strong {
+  color: var(--blog-foreground);
+  font-weight: 600;
+}
+
+.article-content a {
+  color: var(--blog-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.article-content a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.article-content hr {
+  border: none;
+  border-top: 1px dotted var(--blog-border);
+  margin: 2.5rem 0;
+}
+
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.75rem 0;
+  font-size: 0.9rem;
+}
+
+.article-content th,
+.article-content td {
+  border: 1px solid var(--blog-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.article-content th {
+  background: var(--blog-muted);
+  font-weight: 600;
+}
+
+/* ============ Theme transition helper ============ */
+.theme-fade,
+.theme-fade * {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+}
