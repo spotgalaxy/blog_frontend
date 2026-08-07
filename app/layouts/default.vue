@@ -18,6 +18,7 @@ useHead({
       <slot />
     </div>
     <SiteFooter />
+    <BackToTop />
   </div>
 </template>
 

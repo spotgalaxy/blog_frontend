@@ -75,13 +75,13 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
 
     <!-- ===== 精选作品 — 杂志式布局 ===== -->
     <section class="works">
-      <div class="works-head">
+      <div v-reveal class="works-head">
         <SectionTitle title="精选作品" />
       </div>
 
       <template v-for="(project, i) in featuredProjects" :key="project.slug">
         <!-- 全宽布局 -->
-        <article v-if="layoutOf(i) === 'full'" class="work work-full">
+        <article v-if="layoutOf(i) === 'full'" v-reveal class="work work-full">
           <NuxtLink :to="'/projects/' + project.slug" class="work-cover cover-wide" :style="{ background: project.coverDark ?? project.cover }">
             <span class="cover-text font-serif-warm">{{ project.name }}</span>
           </NuxtLink>
@@ -96,7 +96,7 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
         </article>
 
         <!-- 左图右文 / 左文右图 -->
-        <article v-else class="work work-split">
+        <article v-else v-reveal class="work work-split">
           <NuxtLink
             :to="'/projects/' + project.slug"
             class="work-cover cover-normal"
@@ -119,15 +119,16 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
 
     <!-- ===== 最新文章 — 文字列表 ===== -->
     <section class="posts">
-      <div class="posts-head">
+      <div v-reveal class="posts-head">
         <SectionTitle title="最新文章" />
         <NuxtLink to="/blog" class="view-all font-serif-warm">查看全部 &rarr;</NuxtLink>
       </div>
 
       <div class="post-list">
         <NuxtLink
-          v-for="post in latestPosts"
+          v-for="(post, i) in latestPosts"
           :key="post.slug"
+          v-reveal="{ delay: i * 70 }"
           :to="'/blog/' + post.slug"
           class="post-item"
         >
@@ -144,7 +145,7 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
     </section>
 
     <!-- ===== 结语 ===== -->
-    <section class="closing">
+    <section v-reveal class="closing">
       <DecoLine short />
       <p class="closing-text font-serif-warm">愿文字有力量。</p>
       <DecoLine short />
@@ -153,6 +154,33 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
 </template>
 
 <style scoped>
+/* ===== Hero 入场动画 ===== */
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hero > * {
+  animation: hero-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.hero > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.hero > *:nth-child(4) {
+  animation-delay: 0.26s;
+}
+.hero > *:nth-child(5) {
+  animation-delay: 0.36s;
+}
+
 /* ===== Hero ===== */
 .hero {
   max-width: var(--blog-content-narrow);
@@ -266,14 +294,35 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
 }
 
 .work-cover {
+  position: relative;
   display: block;
   width: 100%;
   overflow: hidden;
   border-radius: var(--blog-radius-sm);
-  transition: transform 0.4s ease;
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+}
+.work-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 .work-cover:hover {
   transform: scale(1.015);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+.work-cover:hover::after {
+  opacity: 1;
 }
 .cover-normal {
   aspect-ratio: 4 / 3;
@@ -283,6 +332,8 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
   margin-bottom: 24px;
 }
 .cover-text {
+  position: relative;
+  z-index: 1;
   display: flex;
   height: 100%;
   width: 100%;
@@ -290,6 +341,13 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
   justify-content: center;
   font-size: 1.125rem;
   color: rgba(255, 255, 255, 0.6);
+  transition:
+    color 0.3s ease,
+    letter-spacing 0.4s ease;
+}
+.work-cover:hover .cover-text {
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.08em;
 }
 .cover-wide .cover-text {
   font-size: 1.25rem;
@@ -372,8 +430,10 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
 
 .post-item {
   display: block;
-  padding: 32px 0;
+  margin: 0 -12px;
+  padding: 32px 12px;
   border-bottom: 1px dotted var(--blog-border);
+  border-radius: var(--blog-radius-md);
   transition: background-color 0.2s ease;
 }
 .post-item:last-child {

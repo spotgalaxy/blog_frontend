@@ -17,7 +17,7 @@ const { data: projects } = await useAsyncData('projects-list', () =>
   $fetch<{ code: number; message: string; data: Project[] }>('/api/projects').then((r) => r.data)
 )
 
-const categories = ['全部', '后端端开发', '数据库设计', '全栈']
+const categories = ['全部', '后端开发', '数据库设计', '全栈']
 const activeCat = ref('全部')
 
 const filtered = computed(() =>
@@ -66,7 +66,7 @@ const blocks = computed<Block[]>(() => {
         <p class="head-kicker">精选项目</p>
         <h1 class="head-title font-serif-warm">作品集</h1>
         <p class="head-sub">
-          过去参与和独立完成的一些项目，涵盖后端端开发、数据库与全栈实践。
+          过去参与和独立完成的一些项目，涵盖后端开发、数据库与全栈实践。
         </p>
         <div class="deco-line head-deco" />
       </div>

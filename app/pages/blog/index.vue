@@ -90,7 +90,7 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
 
     <!-- 文章列表 -->
     <main class="post-list">
-      <article v-for="post in paged" :key="post.slug" class="post">
+      <article v-for="(post, i) in paged" :key="post.slug" v-reveal="{ delay: i * 60 }" class="post">
         <NuxtLink :to="'/blog/' + post.slug" class="post-link">
           <time class="post-date font-serif-warm">{{ formatDateFull(post.publishedAt) }}</time>
           <h2 class="post-title font-serif-warm">{{ post.title }}</h2>
@@ -193,7 +193,7 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
 .tag-item {
   background: none;
   border: none;
-  padding: 0 0 2px;
+  padding: 6px 2px;
   font-size: 0.875rem;
   font-family: var(--blog-font-sans);
   color: var(--blog-muted-foreground);

@@ -9,10 +9,11 @@ const yearCn = formatYearCn(new Date().getFullYear())
         &copy; {{ yearCn }} {{ site.name }} · 用心书写
       </p>
       <div class="footer-links">
-        <template v-for="(s, i) in site.socials" :key="s.label">
+        <template v-for="s in site.socials" :key="s.label">
           <a :href="s.href" class="footer-link font-serif-warm">{{ s.label }}</a>
-          <span v-if="i < site.socials.length - 1" class="sep">·</span>
+          <span class="sep">·</span>
         </template>
+        <a href="/rss.xml" class="footer-link font-serif-warm">RSS</a>
       </div>
     </div>
   </footer>

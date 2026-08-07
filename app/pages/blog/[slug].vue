@@ -202,9 +202,84 @@ watch(tocCollapsed, (v) => {
     }
   }
 })
+
+/* ===== 阅读进度条 ===== */
+const readProgress = ref(0)
+
+function updateProgress() {
+  const el = document.documentElement
+  const total = el.scrollHeight - el.clientHeight
+  readProgress.value = total > 0 ? Math.min(1, Math.max(0, el.scrollTop / total)) : 0
+}
+
+/* ===== 代码块复制按钮 ===== */
+function setupCodeCopy() {
+  if (!import.meta.client) return
+  const root = document.querySelector('.article-content')
+  if (!root) return
+  root.querySelectorAll('pre').forEach((pre) => {
+    if (pre.querySelector('.code-copy-btn')) return
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'code-copy-btn'
+    btn.textContent = '复制'
+    btn.addEventListener('click', async () => {
+      const text = pre.querySelector('code')?.textContent ?? pre.textContent ?? ''
+      try {
+        await navigator.clipboard.writeText(text)
+        btn.textContent = '已复制 ✓'
+        btn.classList.add('copied')
+        setTimeout(() => {
+          btn.textContent = '复制'
+          btn.classList.remove('copied')
+        }, 2000)
+      } catch {
+        /* 忽略剪贴板权限错误 */
+      }
+    })
+    pre.appendChild(btn)
+  })
+}
+
+/* ===== 目录当前项自动滚动到可视区域 ===== */
+watch(activeId, () => {
+  if (!import.meta.client) return
+  nextTick(() => {
+    const aside = document.querySelector<HTMLElement>('.article-toc')
+    const link = aside?.querySelector<HTMLElement>('.toc-item.active .toc-link')
+    if (!aside || !link) return
+    const above = link.offsetTop < aside.scrollTop
+    const below = link.offsetTop + link.offsetHeight > aside.scrollTop + aside.clientHeight
+    if (above || below) {
+      aside.scrollTo({
+        top: link.offsetTop - aside.clientHeight / 2,
+        behavior: 'smooth'
+      })
+    }
+  })
+})
+
+onMounted(() => {
+  updateProgress()
+  window.addEventListener('scroll', updateProgress, { passive: true })
+  nextTick(setupCodeCopy)
+})
+
+watch(rendered, () => {
+  if (import.meta.client) nextTick(setupCodeCopy)
+})
+
+onBeforeUnmount(() => {
+  if (import.meta.client) window.removeEventListener('scroll', updateProgress)
+})
 </script>
 
 <template>
+  <!-- ===== 阅读进度条 ===== -->
+  <div class="read-progress" aria-hidden="true">
+    <div class="read-progress-bar" :style="{ transform: `scaleX(${readProgress})` }" />
+  </div>
+
   <main v-if="post" class="article-shell" :class="{ 'with-toc': toc.length, 'toc-collapsed': tocCollapsed && toc.length }">
     <div class="article-col">
       <!-- ===== 文章头部 ===== -->
@@ -351,6 +426,24 @@ watch(tocCollapsed, (v) => {
 </template>
 
 <style scoped>
+/* ===== 阅读进度条 ===== */
+.read-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 80;
+  pointer-events: none;
+}
+.read-progress-bar {
+  height: 100%;
+  background: var(--blog-primary);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.08s linear;
+}
+
 .article-shell {
   max-width: var(--blog-content-wide);
   margin: 0 auto;
