@@ -4,7 +4,7 @@ export const site = {
   title: 'spotgalaxy · 个人博客',
   description: '关于技术、设计、阅读与生活的缓慢思考。',
   url: 'https://www.spotgalaxy.top',
-  email: 'mailto:spotgalaxy_23@163.com',
+  email: 'spotgalaxy_23@163.com',
   nav: [
     { label: '首页', href: '/' },
     { label: '博客', href: '/blog' },
