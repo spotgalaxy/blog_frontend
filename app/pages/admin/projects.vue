@@ -61,11 +61,41 @@ const save = async () => {
   }
   if (editingId.value) {
     await apiFetch(`/api/projects/${editingId.value}`, { method: 'PUT', body: payload })
+    showForm.value = false
   } else {
-    await apiFetch('/api/projects', { method: 'POST', body: payload })
+    // 新建后保持表单为编辑态，便于继续点"生成 AI 介绍"
+    const { data } = await apiFetch<{ code: number; message: string; data: { id: number } }>(
+      '/api/projects', { method: 'POST', body: payload }
+    )
+    editingId.value = data.id
+    formMsg.value = '已保存，可继续生成 AI 介绍'
   }
-  showForm.value = false
   refresh()
+}
+
+const formMsg = ref('')
+const introMsg = ref('')
+const generating = ref(false)
+
+const genIntro = async () => {
+  if (!editingId.value) {
+    introMsg.value = '请先保存作品再生成'
+    return
+  }
+  generating.value = true
+  introMsg.value = ''
+  try {
+    const { data } = await apiFetch<{ code: number; message: string; data: { summary: string } }>(
+      '/api/ai/project-intro',
+      { method: 'POST', body: { projectId: editingId.value } }
+    )
+    form.summary = data.summary
+    introMsg.value = '已生成，记得保存'
+  } catch (e: any) {
+    introMsg.value = e?.data?.message || '生成失败'
+  } finally {
+    generating.value = false
+  }
 }
 
 const remove = async (p: Project) => {
@@ -149,6 +179,12 @@ const remove = async (p: Project) => {
       <div class="field">
         <label class="field-label">一句话介绍（展示在作品卡片上）</label>
         <textarea v-model="form.summary" class="edit-input" placeholder="一句话介绍" rows="2" />
+        <div class="edit-summary">
+          <button type="button" class="admin-btn small" :disabled="generating" @click="genIntro">
+            {{ generating ? '生成中…' : '生成 AI 介绍' }}
+          </button>
+          <span class="edit-msg">{{ introMsg || formMsg }}</span>
+        </div>
       </div>
       <div class="field">
         <label class="field-label">正文（作品详情页内容，支持 Markdown，如 ## 标题、- 列表）</label>
@@ -203,4 +239,7 @@ const remove = async (p: Project) => {
 .editor { min-height: 240px; font-family: var(--blog-font-mono); line-height: 1.7; resize: vertical; }
 .check-row { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--blog-foreground); }
 .form-actions { display: flex; gap: 12px; }
+.admin-btn.small { padding: 4px 12px; font-size: 0.8rem; align-self: flex-start; }
+.edit-summary { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.edit-msg { font-size: 0.8rem; color: var(--blog-muted-foreground); }
 </style>
