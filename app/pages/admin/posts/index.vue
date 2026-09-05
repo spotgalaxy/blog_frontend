@@ -25,6 +25,7 @@ const confirmDelete = async (p: Post) => {
 
 <template>
   <main class="admin-wrap">
+    <AdminNav />
     <div class="admin-head">
       <h1 class="admin-title font-serif-warm">文章管理</h1>
       <NuxtLink to="/admin/posts/edit" class="admin-btn primary">新建文章</NuxtLink>

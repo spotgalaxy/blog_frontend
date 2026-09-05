@@ -87,6 +87,7 @@ watch(
 
 <template>
   <main class="edit-wrap">
+    <AdminNav />
     <div class="edit-head">
       <NuxtLink to="/admin/posts" class="back-link">&larr; 返回列表</NuxtLink>
       <h1 class="edit-title font-serif-warm">{{ editId ? '编辑文章' : '新建文章' }}</h1>

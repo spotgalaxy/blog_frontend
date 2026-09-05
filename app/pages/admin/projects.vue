@@ -77,6 +77,7 @@ const remove = async (p: Project) => {
 
 <template>
   <main class="admin-wrap">
+    <AdminNav />
     <div class="admin-head">
       <h1 class="admin-title font-serif-warm">作品管理</h1>
       <button class="admin-btn primary" @click="openCreate">新建作品</button>
