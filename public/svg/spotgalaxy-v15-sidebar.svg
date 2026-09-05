@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="160" viewBox="0 0 640 160" role="img" aria-labelledby="t15 d15">
+  <title id="t15">spotgalaxy · V15 竖线编辑版</title>
+  <desc id="d15">金色竖线引导的左对齐叠排：斜体 spot 在上、宽字距 GALAXY 在下，杂志栏头气质。</desc>
+  <rect x="118" y="34" width="6" height="96" fill="#D9A441"/>
+  <text x="146" y="86" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="46" fill="#7A5C3E">spot</text>
+  <text x="148" y="126" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="26" letter-spacing="10" fill="#3E3428">GALAXY</text>
+  <path d="M318 108 l2.2 5.4 5.4 2.2 -5.4 2.2 -2.2 5.4 -2.2 -5.4 -5.4 -2.2 5.4 -2.2 Z" fill="#D9A441"/>
+</svg>
