@@ -58,9 +58,9 @@ useHead({
       </a>
     </section>
 
-    <!-- 封面 -->
-    <section v-if="project.cover" class="proj-cover-wrap">
-      <div class="proj-cover" :style="{ background: project.coverDark ?? project.cover }">
+    <!-- 封面（内部展示：详情页优先用 coverDark，仅填外部色时回退） -->
+    <section v-if="project.cover || project.coverDark" class="proj-cover-wrap">
+      <div class="proj-cover" :style="coverStyle(project.coverDark || project.cover)">
         <span class="cover-letter font-serif-warm">{{ project.letter }}</span>
       </div>
     </section>

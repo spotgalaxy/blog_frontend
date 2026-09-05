@@ -7,6 +7,7 @@ interface Post {
   summary: string
   content: string
   tags: string[]
+  cover: string | null
   publishedAt: string | null
 }
 
@@ -92,16 +93,19 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
     <main class="post-list">
       <article v-for="(post, i) in paged" :key="post.slug" v-reveal="{ delay: i * 60 }" class="post">
         <NuxtLink :to="'/blog/' + post.slug" class="post-link">
-          <time class="post-date font-serif-warm">{{ formatDateFull(post.publishedAt) }}</time>
-          <h2 class="post-title font-serif-warm">{{ post.title }}</h2>
-          <p class="post-summary">{{ post.summary }}</p>
-          <div class="post-meta">
-            <span>约 {{ minutes(post) }} 分钟阅读</span>
-            <template v-for="tag in post.tags" :key="tag">
-              <span class="sep">·</span>
-              <span class="post-tag">{{ tag }}</span>
-            </template>
+          <div class="post-text">
+            <time class="post-date font-serif-warm">{{ formatDateFull(post.publishedAt) }}</time>
+            <h2 class="post-title font-serif-warm">{{ post.title }}</h2>
+            <p class="post-summary">{{ post.summary }}</p>
+            <div class="post-meta">
+              <span>约 {{ minutes(post) }} 分钟阅读</span>
+              <template v-for="tag in post.tags" :key="tag">
+                <span class="sep">·</span>
+                <span class="post-tag">{{ tag }}</span>
+              </template>
+            </div>
           </div>
+          <PostCover :cover="post.cover" :alt="post.title" direction="right" class="post-cover" />
         </NuxtLink>
       </article>
     </main>
@@ -220,7 +224,20 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
   gap: 64px;
 }
 .post-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.post-text {
+  flex: 1;
+  min-width: 0;
+}
+/* 有封面时:右侧 4:3 封面,左缘模糊融入文字区 */
+.post-cover {
+  width: 38%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--blog-radius-md);
+  flex-shrink: 0;
 }
 .post-date {
   font-size: 0.875rem;

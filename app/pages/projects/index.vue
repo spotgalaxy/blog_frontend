@@ -92,7 +92,7 @@ const blocks = computed<Block[]>(() => {
           <!-- 双列小图 -->
           <div v-if="block.type === 'halves'" class="grid-half">
             <article v-for="h in block.items" :key="h.item.slug">
-              <NuxtLink :to="'/projects/' + h.item.slug" class="cover cover-half" :style="{ background: h.item.cover }">
+              <NuxtLink :to="'/projects/' + h.item.slug" class="cover cover-half" :style="coverStyle(h.item.cover || h.item.coverDark)">
                 <span class="cover-letter font-serif-warm">{{ h.item.letter }}</span>
               </NuxtLink>
               <span class="project-num half-num">{{ h.num }}</span>
@@ -120,7 +120,7 @@ const blocks = computed<Block[]>(() => {
 
           <!-- 全宽大图 -->
           <article v-else-if="block.type === 'full'" class="work-full">
-            <NuxtLink :to="'/projects/' + block.item.slug" class="cover cover-full" :style="{ background: block.item.cover }">
+            <NuxtLink :to="'/projects/' + block.item.slug" class="cover cover-full" :style="coverStyle(block.item.cover || block.item.coverDark)">
               <span class="cover-letter big font-serif-warm">{{ block.item.letter }}</span>
             </NuxtLink>
             <div class="full-body">
@@ -136,7 +136,7 @@ const blocks = computed<Block[]>(() => {
 
           <!-- 左右交错 -->
           <article v-else class="work-split" :class="{ rev: block.type === 'split-rev' }">
-            <NuxtLink :to="'/projects/' + block.item.slug" class="cover cover-split" :style="{ background: block.item.cover }">
+            <NuxtLink :to="'/projects/' + block.item.slug" class="cover cover-split" :style="coverStyle(block.item.cover || block.item.coverDark)">
               <span class="cover-letter font-serif-warm">{{ block.item.letter }}</span>
             </NuxtLink>
             <div class="split-body">

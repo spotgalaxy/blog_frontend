@@ -21,6 +21,7 @@ interface Post {
   summary: string
   content: string
   tags: string[]
+  cover: string | null
   publishedAt: string | null
 }
 
@@ -82,7 +83,7 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
       <template v-for="(project, i) in featuredProjects" :key="project.slug">
         <!-- 全宽布局 -->
         <article v-if="layoutOf(i) === 'full'" v-reveal class="work work-full">
-          <NuxtLink :to="'/projects/' + project.slug" class="work-cover cover-wide" :style="{ background: project.coverDark ?? project.cover }">
+          <NuxtLink :to="'/projects/' + project.slug" class="work-cover cover-wide" :style="coverStyle(project.cover || project.coverDark)">
             <span class="cover-text font-serif-warm">{{ project.name }}</span>
           </NuxtLink>
           <div class="work-full-body">
@@ -101,7 +102,7 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
             :to="'/projects/' + project.slug"
             class="work-cover cover-normal"
             :class="{ 'order-right': layoutOf(i) === 'right' }"
-            :style="{ background: project.coverDark ?? project.cover }"
+            :style="coverStyle(project.cover || project.coverDark)"
           >
             <span class="cover-text font-serif-warm">{{ project.name }}</span>
           </NuxtLink>
@@ -132,14 +133,17 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
           :to="'/blog/' + post.slug"
           class="post-item"
         >
-          <div class="post-meta">
-            <time class="tabular">{{ formatDateCn(post.publishedAt) }}</time>
-            <span v-if="post.tags?.length" class="post-cat">
-              · {{ post.tags.slice(0, 2).join(' 与 ') }}
-            </span>
+          <div class="post-item-text">
+            <div class="post-meta">
+              <time class="tabular">{{ formatDateCn(post.publishedAt) }}</time>
+              <span v-if="post.tags?.length" class="post-cat">
+                · {{ post.tags.slice(0, 2).join(' 与 ') }}
+              </span>
+            </div>
+            <h3 class="post-title font-serif-warm">{{ post.title }}</h3>
+            <p class="post-summary">{{ post.summary }}</p>
           </div>
-          <h3 class="post-title font-serif-warm">{{ post.title }}</h3>
-          <p class="post-summary">{{ post.summary }}</p>
+          <PostCover :cover="post.cover" :alt="post.title" direction="right" class="home-post-cover" />
         </NuxtLink>
       </div>
     </section>
@@ -429,7 +433,9 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
 }
 
 .post-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 20px;
   margin: 0 -12px;
   padding: 32px 12px;
   border-bottom: 1px dotted var(--blog-border);
@@ -441,6 +447,22 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
 }
 .post-item:hover {
   background: color-mix(in srgb, var(--blog-muted) 30%, transparent);
+}
+.post-item-text {
+  flex: 1;
+  min-width: 0;
+}
+/* 右侧封面:与博客列表同款左文右图,左缘模糊融入文字区 */
+.home-post-cover {
+  width: 132px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--blog-radius-md);
+  flex-shrink: 0;
+}
+@media (max-width: 639px) {
+  .home-post-cover {
+    width: 96px;
+  }
 }
 
 .post-meta {

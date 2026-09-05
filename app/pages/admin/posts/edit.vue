@@ -16,6 +16,9 @@ const form = reactive({
   draft: true
 })
 
+// 封面展示类型：图片 / 纯色。值本身自描述（颜色或地址），渲染端按值自动区分
+const coverType = ref<'color' | 'image'>('image')
+
 if (editId) {
   // apiFetch 返回完整 envelope {code,message,data}，解构 data 即拿到数组
   const { data: list } = await apiFetch<{ code: number; message: string; data: Array<{ id: number; slug: string }> }>('/api/posts?draft=true')
@@ -32,8 +35,14 @@ if (editId) {
     form.tagsText = (post.tags ?? []).join(',')
     form.cover = post.cover ?? ''
     form.draft = post.draft
+    coverType.value = isColorValue(form.cover) ? 'color' : 'image'
   }
 }
+
+// 切换类型时清掉不匹配的旧值（图片地址 ↔ 颜色）
+watch(coverType, (t) => {
+  if (form.cover && isColorValue(form.cover) !== (t === 'color')) form.cover = ''
+})
 
 const tagsList = computed(() =>
   form.tagsText.split(',').map((s) => s.trim()).filter(Boolean)
@@ -133,8 +142,16 @@ const genSummary = async () => {
           <input v-model="form.slug" class="edit-input" placeholder="slug（URL 标识，如 my-first-post）" />
         </div>
         <div class="field">
-          <label class="field-label">封面（可选，可填图片地址或颜色值）</label>
-          <input v-model="form.cover" class="edit-input" placeholder="封面（可选）" />
+          <label class="field-label">封面（可选，选图片填地址，选纯色填颜色值）</label>
+          <div class="cover-type">
+            <label class="type-opt"><input v-model="coverType" type="radio" value="image" /> 图片</label>
+            <label class="type-opt"><input v-model="coverType" type="radio" value="color" /> 纯色</label>
+          </div>
+          <input
+            v-model="form.cover"
+            class="edit-input"
+            :placeholder="coverType === 'color' ? '封面颜色，如 #b45309' : '封面图片地址，https://…'"
+          />
         </div>
       </div>
       <div class="field">
@@ -200,4 +217,10 @@ const genSummary = async () => {
 .editor { min-height: 420px; font-family: var(--blog-font-mono); line-height: 1.7; resize: vertical; }
 .preview-box { border: 1px solid var(--blog-border); border-radius: var(--blog-radius-md); padding: 24px; }
 .edit-summary { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.cover-type { display: flex; gap: 16px; }
+.type-opt {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.8rem; color: var(--blog-muted-foreground); cursor: pointer;
+}
+.type-opt input { accent-color: var(--blog-primary); margin: 0; }
 </style>

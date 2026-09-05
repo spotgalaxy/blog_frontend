@@ -9,6 +9,7 @@ interface Post {
   summary: string
   content: string
   tags: string[]
+  cover: string | null
   publishedAt: string | null
   viewCount?: number
 }
@@ -56,7 +57,13 @@ const minutes = readingTime(post.value.content ?? '')
 
 useHead({
   title: `${post.value.title} · spotgalaxy`,
-  meta: [{ name: 'description', content: post.value.summary }]
+  meta: [
+    { name: 'description', content: post.value.summary },
+    // og:image 仅在封面为图片地址时输出,纯色值对分享无意义
+    ...(post.value.cover && !isColorValue(post.value.cover)
+      ? [{ property: 'og:image', content: post.value.cover }]
+      : [])
+  ]
 })
 
 const copied = ref(false)
@@ -354,8 +361,13 @@ onBeforeUnmount(() => {
     <div class="read-progress-bar" :style="{ transform: `scaleX(${readProgress})` }" />
   </div>
 
-  <main v-if="post" class="article-shell" :class="{ 'with-toc': toc.length, 'toc-collapsed': tocCollapsed && toc.length }">
+  <main v-if="post" class="article-shell" :class="{ 'with-toc': toc.length, 'toc-collapsed': tocCollapsed && toc.length, 'has-hero': !!post.cover }">
     <div class="article-col">
+      <!-- ===== 顶部封面（向下渐模糊） ===== -->
+      <div class="article-hero">
+        <PostCover :cover="post.cover" :alt="post.title" direction="bottom" class="article-hero-cover" />
+      </div>
+
       <!-- ===== 文章头部 ===== -->
       <section class="article-head">
         <NuxtLink to="/blog" class="back-link font-serif-warm">
@@ -608,6 +620,22 @@ onBeforeUnmount(() => {
   margin: 0 auto;
   padding-left: 24px;
   padding-right: 24px;
+}
+
+/* ===== 顶部封面 hero ===== */
+.article-hero {
+  max-width: var(--blog-content-narrow);
+  margin: 0 auto;
+  padding: 40px 24px 0;
+}
+.article-hero-cover {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  border-radius: var(--blog-radius-md);
+}
+/* 有封面时压缩头部上边距,让渐隐的封面与标题保持呼吸感 */
+.article-shell.has-hero .article-head {
+  padding-top: 24px;
 }
 
 /* ===== 头部 ===== */
