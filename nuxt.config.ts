@@ -9,6 +9,15 @@ export default defineNuxtConfig({
 
   modules: ['@nuxt/content'],
 
+  // 运行时 parseMarkdown（后台 API 动态内容）的 SSR 高亮走内部路由
+  // /api/_mdc/highlight，@nuxt/content 默认给 mdc 塞了 noApiRoute: true
+  // 导致该路由不注册、SSR 高亮 404 被静默吞掉，必须显式关掉
+  mdc: {
+    highlight: {
+      noApiRoute: false
+    }
+  },
+
   // 监听所有网卡，使局域网内设备也能访问（手机 / 同 Wi-Fi 的其他电脑）
   devServer: {
     host: '0.0.0.0',
