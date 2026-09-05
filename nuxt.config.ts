@@ -52,6 +52,9 @@ export default defineNuxtConfig({
     build: {
       markdown: {
         highlight: {
+          // Cloudflare 等 serverless 运行时没有 WASM 支持，必须用 JS 正则引擎，
+          // 否则高亮器加载失败被静默吞掉（表现就是代码块无高亮）
+          shikiEngine: 'javascript',
           theme: {
             default: 'github-light',
             dark: 'github-dark'
