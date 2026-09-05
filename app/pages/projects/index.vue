@@ -5,7 +5,8 @@ interface Project {
   slug: string
   name: string
   role: string
-  year: number | null
+  devStart: string | null
+  devEnd: string | null
   summary: string
   cover: string | null
   coverDark: string | null
@@ -56,6 +57,11 @@ const blocks = computed<Block[]>(() => {
   flush()
   return result
 })
+
+// 封面装饰字母黑白自适应:按封面颜色深浅切换
+const { toneClass } = useCoverTones(() =>
+  projects.value?.map((p) => p.cover || p.coverDark)
+)
 </script>
 
 <template>
@@ -92,12 +98,17 @@ const blocks = computed<Block[]>(() => {
           <!-- 双列小图 -->
           <div v-if="block.type === 'halves'" class="grid-half">
             <article v-for="h in block.items" :key="h.item.slug">
-              <NuxtLink :to="'/projects/' + h.item.slug" class="cover cover-half" :style="coverStyle(h.item.cover || h.item.coverDark)">
+              <NuxtLink
+                :to="'/projects/' + h.item.slug"
+                class="cover cover-half"
+                :class="toneClass(h.item.cover || h.item.coverDark)"
+                :style="coverStyle(h.item.cover || h.item.coverDark)"
+              >
                 <span class="cover-letter font-serif-warm">{{ h.item.letter }}</span>
               </NuxtLink>
               <span class="project-num half-num">{{ h.num }}</span>
               <h3 class="half-title font-serif-warm">{{ h.item.name }}</h3>
-              <p class="work-meta">{{ h.item.role }} · {{ h.item.year }}</p>
+              <p class="work-meta">{{ h.item.role }} · {{ formatDevPeriod(h.item.devStart, h.item.devEnd) }}</p>
               <p class="half-summary">{{ h.item.summary }}</p>
               <NuxtLink :to="'/projects/' + h.item.slug" class="project-link">
                 查看详情 <span class="link-arrow">&rarr;</span>
@@ -110,7 +121,7 @@ const blocks = computed<Block[]>(() => {
             <div class="center-inner">
               <span class="project-num center-num">{{ block.num }}</span>
               <h2 class="work-title font-serif-warm">{{ block.item.name }}</h2>
-              <p class="work-meta">{{ block.item.role }} · {{ block.item.year }}</p>
+              <p class="work-meta">{{ block.item.role }} · {{ formatDevPeriod(block.item.devStart, block.item.devEnd) }}</p>
               <p class="work-summary">{{ block.item.summary }}</p>
               <NuxtLink :to="'/projects/' + block.item.slug" class="project-link">
                 查看详情 <span class="link-arrow">&rarr;</span>
@@ -120,13 +131,18 @@ const blocks = computed<Block[]>(() => {
 
           <!-- 全宽大图 -->
           <article v-else-if="block.type === 'full'" class="work-full">
-            <NuxtLink :to="'/projects/' + block.item.slug" class="cover cover-full" :style="coverStyle(block.item.cover || block.item.coverDark)">
+            <NuxtLink
+              :to="'/projects/' + block.item.slug"
+              class="cover cover-full"
+              :class="toneClass(block.item.cover || block.item.coverDark)"
+              :style="coverStyle(block.item.cover || block.item.coverDark)"
+            >
               <span class="cover-letter big font-serif-warm">{{ block.item.letter }}</span>
             </NuxtLink>
             <div class="full-body">
               <span class="project-num center-num">{{ block.num }}</span>
               <h2 class="work-title font-serif-warm">{{ block.item.name }}</h2>
-              <p class="work-meta">{{ block.item.role }} · {{ block.item.year }}</p>
+              <p class="work-meta">{{ block.item.role }} · {{ formatDevPeriod(block.item.devStart, block.item.devEnd) }}</p>
               <p class="work-summary">{{ block.item.summary }}</p>
               <NuxtLink :to="'/projects/' + block.item.slug" class="project-link">
                 查看详情 <span class="link-arrow">&rarr;</span>
@@ -136,13 +152,18 @@ const blocks = computed<Block[]>(() => {
 
           <!-- 左右交错 -->
           <article v-else class="work-split" :class="{ rev: block.type === 'split-rev' }">
-            <NuxtLink :to="'/projects/' + block.item.slug" class="cover cover-split" :style="coverStyle(block.item.cover || block.item.coverDark)">
+            <NuxtLink
+              :to="'/projects/' + block.item.slug"
+              class="cover cover-split"
+              :class="toneClass(block.item.cover || block.item.coverDark)"
+              :style="coverStyle(block.item.cover || block.item.coverDark)"
+            >
               <span class="cover-letter font-serif-warm">{{ block.item.letter }}</span>
             </NuxtLink>
             <div class="split-body">
               <span class="project-num split-num">{{ block.num }}</span>
               <h2 class="work-title font-serif-warm">{{ block.item.name }}</h2>
-              <p class="work-meta">{{ block.item.role }} · {{ block.item.year }}</p>
+              <p class="work-meta">{{ block.item.role }} · {{ formatDevPeriod(block.item.devStart, block.item.devEnd) }}</p>
               <p class="work-summary">{{ block.item.summary }}</p>
               <NuxtLink :to="'/projects/' + block.item.slug" class="project-link">
                 查看详情 <span class="link-arrow">&rarr;</span>
@@ -285,6 +306,10 @@ const blocks = computed<Block[]>(() => {
   font-size: 6rem;
   font-weight: 300;
   color: rgba(255, 255, 255, 0.4);
+}
+/* 浅色封面 → 黑色装饰字母 */
+.cover.tone-light .cover-letter {
+  color: rgba(0, 0, 0, 0.4);
 }
 .cover-letter.big {
   font-size: 8rem;

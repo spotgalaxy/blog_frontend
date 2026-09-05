@@ -5,7 +5,8 @@ interface Project {
   slug: string
   name: string
   role: string
-  year: number | null
+  devStart: string | null
+  devEnd: string | null
   summary: string
   content: string
   cover: string | null
@@ -42,6 +43,11 @@ const { data: latestPosts } = await useAsyncData('home-posts', () =>
 const todayCn = formatDateCnFull(new Date())
 
 const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
+
+// 封面文字黑白自适应:按封面颜色深浅切换黑字/白字
+const { toneClass } = useCoverTones(() =>
+  featuredProjects.value?.map((p) => p.cover || p.coverDark)
+)
 </script>
 
 <template>
@@ -83,11 +89,16 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
       <template v-for="(project, i) in featuredProjects" :key="project.slug">
         <!-- 全宽布局 -->
         <article v-if="layoutOf(i) === 'full'" v-reveal class="work work-full">
-          <NuxtLink :to="'/projects/' + project.slug" class="work-cover cover-wide" :style="coverStyle(project.cover || project.coverDark)">
+          <NuxtLink
+            :to="'/projects/' + project.slug"
+            class="work-cover cover-wide"
+            :class="toneClass(project.cover || project.coverDark)"
+            :style="coverStyle(project.cover || project.coverDark)"
+          >
             <span class="cover-text font-serif-warm">{{ project.name }}</span>
           </NuxtLink>
           <div class="work-full-body">
-            <p class="work-meta">{{ project.role }} · {{ project.year }}</p>
+            <p class="work-meta">{{ project.role }} · {{ formatDevPeriod(project.devStart, project.devEnd) }}</p>
             <h3 class="work-title font-serif-warm">{{ project.name }}</h3>
             <p class="work-summary">{{ project.summary }}</p>
             <NuxtLink :to="'/projects/' + project.slug" class="work-link font-serif-warm">
@@ -101,13 +112,13 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
           <NuxtLink
             :to="'/projects/' + project.slug"
             class="work-cover cover-normal"
-            :class="{ 'order-right': layoutOf(i) === 'right' }"
+            :class="[{ 'order-right': layoutOf(i) === 'right' }, toneClass(project.cover || project.coverDark)]"
             :style="coverStyle(project.cover || project.coverDark)"
           >
             <span class="cover-text font-serif-warm">{{ project.name }}</span>
           </NuxtLink>
           <div class="work-body" :class="{ 'order-left': layoutOf(i) === 'right' }">
-            <p class="work-meta">{{ project.role }} · {{ project.year }}</p>
+            <p class="work-meta">{{ project.role }} · {{ formatDevPeriod(project.devStart, project.devEnd) }}</p>
             <h3 class="work-title font-serif-warm">{{ project.name }}</h3>
             <p class="work-summary">{{ project.summary }}</p>
             <NuxtLink :to="'/projects/' + project.slug" class="work-link font-serif-warm">
@@ -355,7 +366,24 @@ const layoutOf = (i: number) => ['left', 'right', 'full'][i % 3]
 }
 .cover-wide .cover-text {
   font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.5);
+}
+/* 浅色封面 → 黑字,hover 遮罩改为白色提亮 */
+.work-cover.tone-light .cover-text {
+  color: rgba(0, 0, 0, 0.6);
+}
+.work-cover.tone-light:hover .cover-text {
+  color: rgba(0, 0, 0, 0.95);
+}
+.cover-wide.tone-light .cover-text {
+  color: rgba(0, 0, 0, 0.5);
+}
+.work-cover.tone-light::after {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.28) 100%
+  );
 }
 
 .work-full-body {

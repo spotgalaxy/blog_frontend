@@ -130,7 +130,8 @@ const timeline = [
 .avatar-char {
   font-size: 1.875rem;
   font-weight: 500;
-  color: #fff;
+  /* 日间黑、夜间白,跟随主题 */
+  color: var(--blog-foreground);
 }
 .hero-title {
   text-align: center;

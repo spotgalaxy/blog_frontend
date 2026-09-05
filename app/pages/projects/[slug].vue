@@ -6,7 +6,8 @@ interface Project {
   slug: string
   name: string
   role: string
-  year: number | null
+  devStart: string | null
+  devEnd: string | null
   summary: string
   content: string
   cover: string | null
@@ -29,6 +30,9 @@ const { data: rendered } = await useAsyncData(`render-proj-${slug}`, () =>
   parseMarkdown(project.value!.content)
 )
 
+// 封面装饰字母黑白自适应:按封面颜色深浅切换
+const { toneClass } = useCoverTones(() => [project.value?.coverDark || project.value?.cover])
+
 useHead({
   title: `${project.value.name} · 作品集 · spotgalaxy`,
   meta: [{ name: 'description', content: project.value.summary }]
@@ -43,7 +47,7 @@ useHead({
         <span>&larr;</span> 返回作品集
       </NuxtLink>
 
-      <p class="proj-meta">{{ project.role }} · {{ project.year }}</p>
+      <p class="proj-meta">{{ project.role }} · {{ formatDevPeriod(project.devStart, project.devEnd) }}</p>
       <h1 class="proj-title font-serif-warm">{{ project.name }}</h1>
       <p class="proj-summary">{{ project.summary }}</p>
 
@@ -60,7 +64,7 @@ useHead({
 
     <!-- 封面（内部展示：详情页优先用 coverDark，仅填外部色时回退） -->
     <section v-if="project.cover || project.coverDark" class="proj-cover-wrap">
-      <div class="proj-cover" :style="coverStyle(project.coverDark || project.cover)">
+      <div class="proj-cover" :class="toneClass(project.coverDark || project.cover)" :style="coverStyle(project.coverDark || project.cover)">
         <span class="cover-letter font-serif-warm">{{ project.letter }}</span>
       </div>
     </section>
@@ -164,6 +168,10 @@ useHead({
   font-size: 7rem;
   font-weight: 300;
   color: rgba(255, 255, 255, 0.35);
+}
+/* 浅色封面 → 黑色装饰字母 */
+.proj-cover.tone-light .cover-letter {
+  color: rgba(0, 0, 0, 0.35);
 }
 
 .proj-body {

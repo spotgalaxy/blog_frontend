@@ -9,7 +9,8 @@ interface Project {
   slug: string
   name: string
   role: string
-  year: number | null
+  devStart: string | null
+  devEnd: string | null
   featured: boolean
 }
 
@@ -36,7 +37,7 @@ const confirmDelete = async (p: Project) => {
         <div>
           <NuxtLink :to="`/admin/projects/edit?id=${p.id}`" class="row-title">{{ p.name }}</NuxtLink>
           <div class="row-meta">
-            <span>{{ p.role }} · {{ p.year ?? '—' }}</span>
+            <span>{{ p.role }} · {{ formatDevPeriod(p.devStart, p.devEnd) || '—' }}</span>
             <span v-if="p.featured" class="badge pub">精选</span>
             <span>{{ p.slug }}</span>
           </div>

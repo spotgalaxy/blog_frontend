@@ -11,7 +11,8 @@ interface Project {
   slug: string
   name: string
   role: string
-  year: number | null
+  devStart: string | null
+  devEnd: string | null
   summary: string
   content: string
   cover: string | null
@@ -23,7 +24,7 @@ interface Project {
 }
 
 const form = reactive({
-  slug: '', name: '', role: '', year: null as number | null,
+  slug: '', name: '', role: '', devStart: '', devEnd: '',
   summary: '', content: '', cover: '', coverDark: '', letter: 'P',
   link: '', featured: false, sortOrder: 99
 })
@@ -37,7 +38,8 @@ if (editId.value) {
   const p = list.find((x) => x.id === editId.value)
   if (p) {
     Object.assign(form, {
-      slug: p.slug, name: p.name, role: p.role ?? '', year: p.year,
+      slug: p.slug, name: p.name, role: p.role ?? '',
+      devStart: p.devStart ?? '', devEnd: p.devEnd ?? '',
       summary: p.summary ?? '', content: p.content ?? '', cover: p.cover ?? '',
       coverDark: p.coverDark ?? '', letter: p.letter ?? 'P', link: p.link ?? '',
       featured: p.featured, sortOrder: p.sortOrder
@@ -63,7 +65,8 @@ const save = async () => {
   saving.value = true
   msg.value = ''
   const payload = {
-    slug: form.slug, name: form.name, role: form.role, year: form.year,
+    slug: form.slug, name: form.name, role: form.role,
+    devStart: form.devStart || null, devEnd: form.devEnd || null,
     summary: form.summary, content: form.content, cover: form.cover || null,
     coverDark: form.coverDark || null, letter: form.letter, link: form.link || null,
     featured: form.featured, sortOrder: form.sortOrder
@@ -155,8 +158,12 @@ watch(
       </div>
       <div class="field-row">
         <div class="field">
-          <label class="field-label">年份（项目完成年份，如 2025）</label>
-          <input v-model.number="form.year" type="number" class="edit-input" placeholder="年份" />
+          <label class="field-label">开发开始（年-月，如 2024-03）</label>
+          <input v-model="form.devStart" type="month" class="edit-input" />
+        </div>
+        <div class="field">
+          <label class="field-label">开发结束（年-月，进行中可留空）</label>
+          <input v-model="form.devEnd" type="month" class="edit-input" />
         </div>
         <div class="field">
           <label class="field-label">排序（数字越小越靠前，默认 99）</label>
