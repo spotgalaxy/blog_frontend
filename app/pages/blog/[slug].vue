@@ -10,6 +10,7 @@ interface Post {
   content: string
   tags: string[]
   publishedAt: string | null
+  viewCount?: number
 }
 
 interface ApiEnvelope<T> {
@@ -259,6 +260,79 @@ watch(activeId, () => {
   })
 })
 
+/* ===== 阅读量上报（后端同日同 IP 去重） ===== */
+onMounted(() => {
+  $fetch(`/api/posts/${slug}/view`, { method: 'POST' }).catch(() => {})
+})
+
+/* ===== AI 摘要（仅读缓存，未命中不展示） ===== */
+const { data: aiSummary } = await useAsyncData(`ai-${slug}`, async () => {
+  try {
+    const res = await $fetch<ApiEnvelope<{ summary: string; model: string }>>(`/api/posts/${slug}/summary`)
+    return res.data
+  } catch {
+    return null
+  }
+})
+
+/* ===== 评论区 ===== */
+interface CommentNode {
+  id: number
+  parentId: number | null
+  author: string
+  content: string
+  createdAt: string
+  replies: CommentNode[]
+}
+
+const { data: comments, refresh: refreshComments } = await useAsyncData(`comments-${slug}`, async () => {
+  try {
+    const res = await $fetch<ApiEnvelope<CommentNode[]>>(`/api/posts/${slug}/comments`)
+    return res.data
+  } catch {
+    return []
+  }
+})
+
+const commentForm = reactive({ author: '', email: '', content: '', parentId: null as number | null })
+const commentMsg = ref('')
+const commentSubmitting = ref(false)
+const replyTo = ref<CommentNode | null>(null)
+
+const startReply = (c: CommentNode) => {
+  replyTo.value = c
+  commentForm.parentId = c.id
+}
+const cancelReply = () => {
+  replyTo.value = null
+  commentForm.parentId = null
+}
+
+const submitComment = async () => {
+  if (commentSubmitting.value) return
+  commentSubmitting.value = true
+  commentMsg.value = ''
+  try {
+    await $fetch(`/api/posts/${slug}/comments`, {
+      method: 'POST',
+      body: {
+        author: commentForm.author,
+        email: commentForm.email || undefined,
+        content: commentForm.content,
+        parentId: commentForm.parentId ?? undefined
+      }
+    })
+    commentForm.content = ''
+    cancelReply()
+    commentMsg.value = '提交成功，审核通过后将展示'
+    await refreshComments()
+  } catch (e: any) {
+    commentMsg.value = e?.data?.message || '提交失败，请稍后再试'
+  } finally {
+    commentSubmitting.value = false
+  }
+}
+
 onMounted(() => {
   updateProgress()
   window.addEventListener('scroll', updateProgress, { passive: true })
@@ -302,10 +376,18 @@ onBeforeUnmount(() => {
           <span class="meta-sep">·</span>
           <span>约 {{ minutes }} 分钟阅读</span>
           <span class="meta-sep">·</span>
+          <span>{{ post.viewCount ?? 0 }} 次阅读</span>
+          <span class="meta-sep">·</span>
           <span>{{ site.name }}</span>
         </div>
 
         <div class="head-divider" />
+
+        <!-- ===== AI 摘要（命中缓存时展示） ===== -->
+        <section v-if="aiSummary" class="ai-summary">
+          <p class="ai-label font-serif-warm">AI 摘要</p>
+          <p class="ai-text">{{ aiSummary.summary }}</p>
+        </section>
       </section>
 
       <!-- ===== 正文 ===== -->
@@ -356,6 +438,53 @@ onBeforeUnmount(() => {
             </div>
           </NuxtLink>
         </div>
+      </section>
+
+      <!-- ===== 评论区 ===== -->
+      <section class="article-comments">
+        <div class="foot-divider" />
+        <h2 class="comments-title font-serif-warm">评论</h2>
+
+        <ul v-if="(comments ?? []).length" class="comment-list">
+          <li v-for="c in comments ?? []" :key="c.id" class="comment-item">
+            <div class="comment-head">
+              <span class="comment-author">{{ c.author }}</span>
+              <span class="comment-time">{{ formatDateFull(c.createdAt) }}</span>
+            </div>
+            <p class="comment-content">{{ c.content }}</p>
+            <button class="comment-reply font-serif-warm" @click="startReply(c)">回复</button>
+
+            <ul v-if="c.replies?.length" class="comment-replies">
+              <li v-for="r in c.replies" :key="r.id" class="comment-item reply">
+                <div class="comment-head">
+                  <span class="comment-author">{{ r.author }}</span>
+                  <span class="comment-time">{{ formatDateFull(r.createdAt) }}</span>
+                </div>
+                <p class="comment-content">{{ r.content }}</p>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <p v-else class="comments-empty">还没有评论，来说两句吧</p>
+
+        <form class="comment-form" @submit.prevent="submitComment">
+          <p v-if="replyTo" class="replying">
+            回复 <strong>{{ replyTo.author }}</strong>
+            <button type="button" class="reply-cancel" @click="cancelReply">取消</button>
+          </p>
+          <div class="comment-fields">
+            <input v-model="commentForm.author" class="comment-input" placeholder="昵称 *" maxlength="50" required />
+            <input v-model="commentForm.email" class="comment-input" type="email" placeholder="邮箱（可选，不公开）" maxlength="200" />
+          </div>
+          <textarea v-model="commentForm.content" class="comment-textarea" placeholder="写下你的评论…" maxlength="2000" required />
+          <div class="comment-actions">
+            <span class="comment-msg">{{ commentMsg }}</span>
+            <button type="submit" class="comment-submit font-serif-warm" :disabled="commentSubmitting">
+              {{ commentSubmitting ? '提交中…' : '提交评论' }}
+            </button>
+          </div>
+          <p class="comment-note">提交后需审核通过才会展示</p>
+        </form>
       </section>
     </div>
 
@@ -871,6 +1000,76 @@ onBeforeUnmount(() => {
 .drawer-slide-leave-to {
   transform: translateX(100%);
 }
+
+/* ===== AI 摘要 ===== */
+.ai-summary {
+  max-width: var(--blog-content-narrow, 720px);
+  margin: 24px auto 0;
+  padding: 16px 20px;
+  border-left: 3px solid var(--blog-primary);
+  background: var(--blog-card);
+  border-radius: 0 var(--blog-radius-sm) var(--blog-radius-sm) 0;
+}
+.ai-label { font-size: 0.8rem; color: var(--blog-primary); margin-bottom: 6px; }
+.ai-text { font-size: 0.95rem; color: var(--blog-muted-foreground); line-height: 1.7; }
+
+/* ===== 评论区 ===== */
+.article-comments { margin-top: 8px; }
+.comments-title { font-size: 1.4rem; color: var(--blog-foreground); margin: 24px 0 16px; }
+.comment-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0 0 24px;
+  padding: 0;
+}
+.comment-item {
+  padding: 16px;
+  border: 1px solid var(--blog-border);
+  border-radius: var(--blog-radius-md);
+  background: var(--blog-card);
+}
+.comment-item.reply { margin-top: 12px; }
+.comment-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.comment-author { font-weight: 500; color: var(--blog-foreground); font-size: 0.95rem; }
+.comment-time { font-size: 0.75rem; color: var(--blog-muted-foreground); }
+.comment-content { color: var(--blog-foreground); font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; margin: 0 0 8px; }
+.comment-reply {
+  background: none; border: none; padding: 0;
+  font-size: 0.8rem; color: var(--blog-primary); cursor: pointer;
+}
+.comment-replies { list-style: none; margin: 0; padding: 0; }
+.comments-empty { color: var(--blog-muted-foreground); font-size: 0.9rem; margin-bottom: 24px; }
+.comment-form { display: flex; flex-direction: column; gap: 12px; }
+.replying { font-size: 0.85rem; color: var(--blog-muted-foreground); display: flex; align-items: center; gap: 8px; }
+.reply-cancel { background: none; border: none; color: var(--blog-primary); cursor: pointer; font-size: 0.85rem; }
+.comment-fields { display: flex; gap: 12px; flex-wrap: wrap; }
+.comment-input {
+  flex: 1; min-width: 200px;
+  padding: 10px 14px; border: 1px solid var(--blog-border);
+  border-radius: var(--blog-radius-sm); background: var(--blog-card);
+  color: var(--blog-foreground); font-size: 0.9rem; box-sizing: border-box;
+}
+.comment-textarea {
+  min-height: 110px; padding: 12px 14px;
+  border: 1px solid var(--blog-border); border-radius: var(--blog-radius-sm);
+  background: var(--blog-card); color: var(--blog-foreground);
+  font-size: 0.9rem; line-height: 1.6; resize: vertical; box-sizing: border-box;
+  font-family: inherit;
+}
+.comment-input:focus, .comment-textarea:focus {
+  outline: none; border-color: var(--blog-primary);
+}
+.comment-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+.comment-msg { font-size: 0.8rem; color: var(--blog-muted-foreground); }
+.comment-submit {
+  padding: 8px 18px; border: 1px solid transparent; border-radius: 999px;
+  background: var(--blog-primary); color: #fff;
+  font-size: 0.875rem; cursor: pointer;
+}
+.comment-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.comment-note { font-size: 0.75rem; color: var(--blog-muted-foreground); margin: 0; }
 
 /* ===== 窄屏：隐藏右侧栏，改由悬浮按钮 + 抽屉接管 ===== */
 @media (max-width: 1024px) {

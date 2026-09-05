@@ -83,6 +83,30 @@ watch(
     if (show) preview.value = await parseMarkdown(form.content)
   }
 )
+
+/* ===== AI 摘要 ===== */
+const summaryMsg = ref('')
+const generating = ref(false)
+const genSummary = async () => {
+  if (!editId) {
+    summaryMsg.value = '请先保存文章再生成摘要'
+    return
+  }
+  generating.value = true
+  summaryMsg.value = ''
+  try {
+    const { data } = await apiFetch<{ code: number; message: string; data: { summary: string } }>(
+      '/api/ai/summary',
+      { method: 'POST', body: { postId: Number(editId) } }
+    )
+    form.summary = data.summary
+    summaryMsg.value = '已生成并填入摘要'
+  } catch (e: any) {
+    summaryMsg.value = e?.data?.message || '生成失败'
+  } finally {
+    generating.value = false
+  }
+}
 </script>
 
 <template>
@@ -99,13 +123,34 @@ watch(
     <p v-if="msg" class="edit-msg">{{ msg }}</p>
 
     <div class="edit-fields">
-      <input v-model="form.title" class="edit-input big" placeholder="标题" />
-      <div class="field-row">
-        <input v-model="form.slug" class="edit-input" placeholder="slug（URL 标识，如 my-first-post）" />
-        <input v-model="form.cover" class="edit-input" placeholder="封面（可选）" />
+      <div class="field">
+        <label class="field-label">标题（文章标题）</label>
+        <input v-model="form.title" class="edit-input big" placeholder="标题" />
       </div>
-      <input v-model="form.tagsText" class="edit-input" placeholder="标签，逗号分隔（如 前端,随笔）" />
-      <textarea v-model="form.summary" class="edit-input" placeholder="摘要" rows="2" />
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">slug（URL 路径，英文/数字/短横线，如 my-first-post）</label>
+          <input v-model="form.slug" class="edit-input" placeholder="slug（URL 标识，如 my-first-post）" />
+        </div>
+        <div class="field">
+          <label class="field-label">封面（可选，可填图片地址或颜色值）</label>
+          <input v-model="form.cover" class="edit-input" placeholder="封面（可选）" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">标签（多个用英文逗号分隔，如 前端,随笔）</label>
+        <input v-model="form.tagsText" class="edit-input" placeholder="标签，逗号分隔（如 前端,随笔）" />
+      </div>
+      <div class="field">
+        <label class="field-label">摘要（展示在文章列表卡片上的一两句话）</label>
+        <textarea v-model="form.summary" class="edit-input" placeholder="摘要" rows="2" />
+        <div class="edit-summary">
+          <button class="admin-btn small" :disabled="generating" @click="genSummary">
+            {{ generating ? '生成中…' : '生成 AI 摘要' }}
+          </button>
+          <span class="edit-msg">{{ summaryMsg }}</span>
+        </div>
+      </div>
     </div>
 
     <div class="editor-toolbar">
@@ -114,12 +159,14 @@ watch(
       </button>
     </div>
 
-    <textarea
-      v-if="!showPreview"
-      v-model="form.content"
-      class="edit-input editor"
-      placeholder="正文（Markdown）"
-    />
+    <div v-if="!showPreview" class="field">
+      <label class="field-label">正文（文章内容，支持 Markdown：## 标题、- 列表、**加粗**、`代码` 等）</label>
+      <textarea
+        v-model="form.content"
+        class="edit-input editor"
+        placeholder="正文（Markdown）"
+      />
+    </div>
     <article v-else class="preview-box article-content">
       <ContentRenderer v-if="preview" :value="preview" />
     </article>
@@ -141,6 +188,8 @@ watch(
 .edit-msg { margin-bottom: 16px; font-size: 0.875rem; color: var(--blog-primary); }
 .edit-fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
 .field-row { display: flex; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.field-label { font-size: 0.75rem; color: var(--blog-muted-foreground); }
 .edit-input {
   width: 100%; padding: 10px 14px; border: 1px solid var(--blog-border);
   border-radius: var(--blog-radius-sm); background: var(--blog-card);
@@ -150,4 +199,5 @@ watch(
 .editor-toolbar { margin-bottom: 8px; }
 .editor { min-height: 420px; font-family: var(--blog-font-mono); line-height: 1.7; resize: vertical; }
 .preview-box { border: 1px solid var(--blog-border); border-radius: var(--blog-radius-md); padding: 24px; }
+.edit-summary { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
 </style>

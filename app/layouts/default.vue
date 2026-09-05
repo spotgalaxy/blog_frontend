@@ -9,6 +9,16 @@ useHead({
     }
   ]
 })
+
+/* ===== 访客统计上报：路由变化即上报，后端写 visit_log ===== */
+const route = useRoute()
+watch(
+  () => route.fullPath,
+  (path) => {
+    $fetch('/api/stats/track', { method: 'POST', body: { path } }).catch(() => {})
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

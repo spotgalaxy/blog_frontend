@@ -3,7 +3,9 @@ const route = useRoute()
 
 const links = [
   { to: '/admin/posts', label: '文章管理', match: (p: string) => p.startsWith('/admin/posts') },
-  { to: '/admin/projects', label: '作品管理', match: (p: string) => p.startsWith('/admin/projects') }
+  { to: '/admin/projects', label: '作品管理', match: (p: string) => p.startsWith('/admin/projects') },
+  { to: '/admin/comments', label: '评论审核', match: (p: string) => p.startsWith('/admin/comments') },
+  { to: '/admin/stats', label: '统计看板', match: (p: string) => p.startsWith('/admin/stats') }
 ]
 </script>
 

@@ -102,25 +102,58 @@ const remove = async (p: Project) => {
 
     <form v-if="showForm" class="proj-form" @submit.prevent="save">
       <h2 class="form-title font-serif-warm">{{ editingId ? '编辑作品' : '新建作品' }}</h2>
-      <input v-model="form.name" class="edit-input" placeholder="项目名" required />
-      <div class="field-row">
-        <input v-model="form.slug" class="edit-input" placeholder="slug" required />
-        <input v-model="form.role" class="edit-input" placeholder="角色（如 前端开发）" />
+      <div class="field">
+        <label class="field-label">项目名（作品的显示名称）</label>
+        <input v-model="form.name" class="edit-input" placeholder="项目名" required />
       </div>
       <div class="field-row">
-        <input v-model.number="form.year" type="number" class="edit-input" placeholder="年份" />
-        <input v-model.number="form.sortOrder" type="number" class="edit-input" placeholder="排序（小在前）" />
+        <div class="field">
+          <label class="field-label">slug（URL 路径，英文/数字/短横线，如 my-project）</label>
+          <input v-model="form.slug" class="edit-input" placeholder="slug" required />
+        </div>
+        <div class="field">
+          <label class="field-label">角色（你在这个项目中担任的职位）</label>
+          <input v-model="form.role" class="edit-input" placeholder="角色（如 前端开发）" />
+        </div>
       </div>
       <div class="field-row">
-        <input v-model="form.cover" class="edit-input" placeholder="封面颜色（如 #b45309）" />
-        <input v-model="form.coverDark" class="edit-input" placeholder="暗色封面颜色" />
+        <div class="field">
+          <label class="field-label">年份（项目完成年份，如 2025）</label>
+          <input v-model.number="form.year" type="number" class="edit-input" placeholder="年份" />
+        </div>
+        <div class="field">
+          <label class="field-label">排序（数字越小越靠前，默认 99）</label>
+          <input v-model.number="form.sortOrder" type="number" class="edit-input" placeholder="排序（小在前）" />
+        </div>
       </div>
       <div class="field-row">
-        <input v-model="form.letter" class="edit-input" placeholder="字母（默认 P）" />
-        <input v-model="form.link" class="edit-input" placeholder="外链（可选）" />
+        <div class="field">
+          <label class="field-label">封面颜色（卡片背景色，填十六进制色值如 #b45309）</label>
+          <input v-model="form.cover" class="edit-input" placeholder="封面颜色（如 #b45309）" />
+        </div>
+        <div class="field">
+          <label class="field-label">暗色模式封面颜色（暗色主题下卡片的背景色）</label>
+          <input v-model="form.coverDark" class="edit-input" placeholder="暗色封面颜色" />
+        </div>
       </div>
-      <textarea v-model="form.summary" class="edit-input" placeholder="一句话介绍" rows="2" />
-      <textarea v-model="form.content" class="edit-input editor" placeholder="正文（Markdown）" />
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">字母（封面上的装饰大字母，默认 P）</label>
+          <input v-model="form.letter" class="edit-input" placeholder="字母（默认 P）" />
+        </div>
+        <div class="field">
+          <label class="field-label">外链（项目上线地址或 GitHub 链接，可留空）</label>
+          <input v-model="form.link" class="edit-input" placeholder="外链（可选）" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">一句话介绍（展示在作品卡片上）</label>
+        <textarea v-model="form.summary" class="edit-input" placeholder="一句话介绍" rows="2" />
+      </div>
+      <div class="field">
+        <label class="field-label">正文（作品详情页内容，支持 Markdown，如 ## 标题、- 列表）</label>
+        <textarea v-model="form.content" class="edit-input editor" placeholder="正文（Markdown）" />
+      </div>
       <label class="check-row">
         <input v-model="form.featured" type="checkbox" />
         首页精选
@@ -165,6 +198,8 @@ const remove = async (p: Project) => {
   color: var(--blog-foreground); font-size: 0.95rem; box-sizing: border-box;
 }
 .field-row { display: flex; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.field-label { font-size: 0.75rem; color: var(--blog-muted-foreground); }
 .editor { min-height: 240px; font-family: var(--blog-font-mono); line-height: 1.7; resize: vertical; }
 .check-row { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--blog-foreground); }
 .form-actions { display: flex; gap: 12px; }
