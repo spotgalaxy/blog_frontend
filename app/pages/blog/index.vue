@@ -68,6 +68,7 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
   <div>
     <!-- 页头区 -->
     <header class="page-head">
+      <img src="/svg/spotgalaxy-v15-sidebar.svg" alt="spotgalaxy" class="brand-mark" />
       <p class="head-kicker font-serif-warm">随笔 · 记录</p>
       <h1 class="head-title font-serif-warm">博客</h1>
       <p class="head-sub">
@@ -150,6 +151,13 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
   margin: 0 auto;
   padding: 48px 24px 40px;
   text-align: center;
+}
+/* 左上角品牌标 */
+.brand-mark {
+  display: block;
+  width: 120px;
+  height: auto;
+  margin-bottom: 32px;
 }
 .head-kicker {
   font-size: 0.875rem;

@@ -69,6 +69,7 @@ const { toneClass } = useCoverTones(() =>
     <!-- 页头区 -->
     <section class="page-head">
       <div class="head-inner">
+        <img src="/svg/spotgalaxy-v15-sidebar.svg" alt="spotgalaxy" class="brand-mark" />
         <p class="head-kicker">精选项目</p>
         <h1 class="head-title font-serif-warm">作品集</h1>
         <p class="head-sub">
@@ -193,6 +194,13 @@ const { toneClass } = useCoverTones(() =>
 /* ===== 页头 ===== */
 .page-head {
   padding: 80px 24px 64px;
+}
+/* 左上角品牌标（与内容区左缘对齐） */
+.brand-mark {
+  display: block;
+  width: 120px;
+  height: auto;
+  margin: 0 0 40px;
 }
 @media (min-width: 768px) {
   .page-head {

@@ -28,7 +28,7 @@ const timeline = [
       <h1 class="hero-title font-serif-warm">关于我</h1>
       <p class="hero-sub font-serif-warm">后端开发者 · 写作者 · 永远的学习者</p>
 
-      <DecoLine class="hero-deco" />
+      <img src="/svg/spotgalaxy-v9-stacked.svg" alt="spotgalaxy" class="hero-deco brand-v9" />
     </section>
 
     <!-- ===== 你好 — 书信式 ===== -->
@@ -154,6 +154,14 @@ const timeline = [
 }
 .hero-deco {
   margin-top: 40px;
+}
+/* v9 叠排字标替换原分隔线 */
+.brand-v9 {
+  display: block;
+  width: 216px;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ===== 通用 section ===== */

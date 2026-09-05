@@ -58,7 +58,7 @@ const { toneClass } = useCoverTones(() =>
         <span class="date-label">{{ todayCn }}</span>
       </div>
 
-      <DecoLine class="hero-deco" />
+      <img src="/svg/spotgalaxy-v9-stacked.svg" alt="spotgalaxy" class="hero-deco brand-v9" />
 
       <h1 class="hero-title font-serif-warm">你好，我是{{ site.name }}</h1>
 
@@ -222,6 +222,14 @@ const { toneClass } = useCoverTones(() =>
 
 .hero-deco {
   margin-bottom: 40px;
+}
+/* v9 叠排字标替换原分隔线 */
+.brand-v9 {
+  display: block;
+  width: 216px;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero-title {

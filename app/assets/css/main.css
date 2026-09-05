@@ -268,13 +268,22 @@ samp {
 .article-content pre {
   margin: 1.75rem 0;
   padding: 1.25rem 1.5rem;
-  background: var(--blog-muted);
+  /* 压掉 Shiki 写在 pre 上的内联主题背景，保持站点暖色卡底 */
+  background: var(--blog-muted) !important;
   border: 1px solid var(--blog-border);
   border-radius: var(--blog-radius-sm);
   font-size: 0.875rem;
   line-height: 1.7;
   overflow-x: auto;
   position: relative;
+}
+
+/* Shiki 双主题：暗色模式改用 --shiki-dark 变量（span 上是内联色，需 !important） */
+html.dark .article-content .shiki,
+html.dark .article-content .shiki span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
 }
 
 .article-content code {

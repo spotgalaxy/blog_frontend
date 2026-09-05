@@ -33,6 +33,28 @@ const { data: rendered } = await useAsyncData(`render-proj-${slug}`, () =>
 // 封面装饰字母黑白自适应:按封面颜色深浅切换
 const { toneClass } = useCoverTones(() => [project.value?.coverDark || project.value?.cover])
 
+/* ===== 目录（共享组件 ArticleToc，与文章页同款） ===== */
+const hasToc = ref(extractHeadings(project.value?.content ?? '').length > 0)
+const tocCollapsed = ref(false)
+
+onMounted(() => {
+  try {
+    tocCollapsed.value = localStorage.getItem('toc-collapsed') === '1'
+  } catch {
+    /* 忽略存储异常 */
+  }
+})
+
+watch(tocCollapsed, (v) => {
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('toc-collapsed', v ? '1' : '0')
+    } catch {
+      /* 忽略存储异常 */
+    }
+  }
+})
+
 useHead({
   title: `${project.value.name} · 作品集 · spotgalaxy`,
   meta: [{ name: 'description', content: project.value.summary }]
@@ -40,51 +62,91 @@ useHead({
 </script>
 
 <template>
-  <main v-if="project">
-    <!-- 头部 -->
-    <section class="proj-head">
-      <NuxtLink to="/projects" class="back-link font-serif-warm">
-        <span>&larr;</span> 返回作品集
-      </NuxtLink>
+  <main v-if="project" class="proj-shell" :class="{ 'with-toc': hasToc, 'toc-collapsed': tocCollapsed && hasToc }">
+    <div class="proj-col">
+      <!-- 头部 -->
+      <section class="proj-head">
+        <img src="/svg/spotgalaxy-v15-sidebar.svg" alt="spotgalaxy" class="brand-mark" />
 
-      <p class="proj-meta">{{ project.role }} · {{ formatDevPeriod(project.devStart, project.devEnd) }}</p>
-      <h1 class="proj-title font-serif-warm">{{ project.name }}</h1>
-      <p class="proj-summary">{{ project.summary }}</p>
+        <NuxtLink to="/projects" class="back-link font-serif-warm">
+          <span>&larr;</span> 返回作品集
+        </NuxtLink>
 
-      <a
-        v-if="project.link"
-        :href="project.link"
-        target="_blank"
-        rel="noopener"
-        class="proj-extlink font-serif-warm"
-      >
-        访问项目 <span>&rarr;</span>
-      </a>
-    </section>
+        <p class="proj-meta">{{ project.role }} · {{ formatDevPeriod(project.devStart, project.devEnd) }}</p>
+        <h1 class="proj-title font-serif-warm">{{ project.name }}</h1>
+        <p class="proj-summary">{{ project.summary }}</p>
 
-    <!-- 封面（内部展示：详情页优先用 coverDark，仅填外部色时回退） -->
-    <section v-if="project.cover || project.coverDark" class="proj-cover-wrap">
-      <div class="proj-cover" :class="toneClass(project.coverDark || project.cover)" :style="coverStyle(project.coverDark || project.cover)">
-        <span class="cover-letter font-serif-warm">{{ project.letter }}</span>
-      </div>
-    </section>
+        <a
+          v-if="project.link"
+          :href="project.link"
+          target="_blank"
+          rel="noopener"
+          class="proj-extlink font-serif-warm"
+        >
+          访问项目 <span>&rarr;</span>
+        </a>
+      </section>
 
-    <!-- 正文 -->
-    <article class="proj-body">
-      <ContentRenderer :value="rendered" class="article-content" />
-    </article>
+      <!-- 封面（内部展示：详情页优先用 coverDark，仅填外部色时回退） -->
+      <section v-if="project.cover || project.coverDark" class="proj-cover-wrap">
+        <div class="proj-cover" :class="toneClass(project.coverDark || project.cover)" :style="coverStyle(project.coverDark || project.cover)">
+          <span class="cover-letter font-serif-warm">{{ project.letter }}</span>
+        </div>
+      </section>
 
-    <!-- 底部导航 -->
-    <section class="proj-foot">
-      <div class="foot-divider" />
-      <NuxtLink to="/projects" class="back-link font-serif-warm">
-        <span>&larr;</span> 返回作品集
-      </NuxtLink>
-    </section>
+      <!-- 正文 -->
+      <article class="proj-body">
+        <ContentRenderer :value="rendered" class="article-content" />
+      </article>
+
+      <!-- 底部导航 -->
+      <section class="proj-foot">
+        <div class="foot-divider" />
+        <NuxtLink to="/projects" class="back-link font-serif-warm">
+          <span>&larr;</span> 返回作品集
+        </NuxtLink>
+      </section>
+    </div>
+
+    <!-- ===== 右侧目录侧边栏（共享组件，桌面侧栏 + 移动端抽屉） ===== -->
+    <ArticleToc
+      :markdown="project.content"
+      :rendered="rendered"
+      v-model:collapsed="tocCollapsed"
+      @update:has-toc="hasToc = $event"
+    />
   </main>
 </template>
 
 <style scoped>
+/* ===== 双栏壳（正文 + 目录侧栏），与文章页同款 ===== */
+.proj-shell {
+  max-width: var(--blog-content-wide);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+}
+.proj-shell.with-toc {
+  grid-template-columns: minmax(0, 1fr) 240px;
+}
+.proj-shell.with-toc.toc-collapsed {
+  grid-template-columns: minmax(0, 1fr) 48px;
+}
+.proj-col {
+  min-width: 0;
+}
+
+/* 左上角品牌标 */
+.brand-mark {
+  display: block;
+  width: 132px;
+  height: auto;
+  margin-bottom: 24px;
+}
+
 .proj-head,
 .proj-body,
 .proj-foot {
@@ -177,6 +239,12 @@ useHead({
 .proj-body {
   padding-bottom: 48px;
 }
+/* 标题锚点滚动偏移（避免被顶部遮挡），与文章页一致 */
+.proj-body :deep(h2),
+.proj-body :deep(h3),
+.proj-body :deep(h4) {
+  scroll-margin-top: 88px;
+}
 
 .proj-foot {
   padding-bottom: 64px;
@@ -186,5 +254,13 @@ useHead({
   width: 100%;
   background: var(--blog-border);
   margin-bottom: 32px;
+}
+
+/* ===== 窄屏：目录侧栏隐藏，改由组件内的悬浮按钮 + 抽屉接管 ===== */
+@media (max-width: 1024px) {
+  .proj-shell,
+  .proj-shell.with-toc {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>
