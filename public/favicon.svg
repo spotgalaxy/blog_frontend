@@ -1,4 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="8" fill="#b45309"/>
-  <text x="32" y="42" font-family="Georgia, 'Songti SC', serif" font-size="32" fill="#faf7f2" text-anchor="middle">spotgalaxy</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-labelledby="t13 d13">
+  <title id="t13">spotgalaxy · V13 六边形徽章</title>
+  <desc id="d13">六边形双线徽章内嵌 sg 斜体双字母与 SPOTGALAXY 小字，几何感与手作感并存。</desc>
+  <path d="M160 36 L267 98 L267 222 L160 284 L53 222 L53 98 Z" fill="none" stroke="#7A5C3E" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M160 52 L254 106 L254 214 L160 268 L66 214 L66 106 Z" fill="none" stroke="#C89B4E" stroke-width="1.5"/>
+  <text x="160" y="184" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="82"><tspan fill="#7A5C3E">s</tspan><tspan fill="#D9A441">g</tspan></text>
+  <text x="160" y="224" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="15" letter-spacing="5" fill="#A08A6A">SPOTGALAXY</text>
+  <circle cx="267" cy="98" r="5" fill="#D9A441"/>
 </svg>
