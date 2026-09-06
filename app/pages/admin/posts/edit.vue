@@ -89,7 +89,7 @@ const showPreview = ref(false)
 watch(
   [showPreview, () => form.content],
   async ([show]) => {
-    if (show) preview.value = await parseMarkdown(form.content)
+    if (show) preview.value = await parseArticleMarkdown(form.content)
   }
 )
 

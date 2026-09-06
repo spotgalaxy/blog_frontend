@@ -27,7 +27,7 @@ if (!project.value) {
 }
 
 const { data: rendered } = await useAsyncData(`render-proj-${slug}`, () =>
-  parseMarkdown(project.value!.content)
+  parseArticleMarkdown(project.value!.content)
 )
 
 // 封面装饰字母黑白自适应:按封面颜色深浅切换
@@ -53,6 +53,12 @@ watch(tocCollapsed, (v) => {
       /* 忽略存储异常 */
     }
   }
+})
+
+/* ===== 代码块语言标识 + 复制按钮（共享逻辑见 utils/codeblock.ts） ===== */
+onMounted(() => nextTick(setupCodeCopy))
+watch(rendered, () => {
+  if (import.meta.client) nextTick(setupCodeCopy)
 })
 
 useHead({

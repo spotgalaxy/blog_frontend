@@ -50,7 +50,7 @@ const nextPost = computed(() => {
 })
 
 const { data: rendered } = await useAsyncData(`render-${slug}`, () =>
-  parseMarkdown(post.value!.content)
+  parseArticleMarkdown(post.value!.content)
 )
 
 const minutes = readingTime(post.value.content ?? '')
@@ -113,34 +113,7 @@ function updateProgress() {
   readProgress.value = total > 0 ? Math.min(1, Math.max(0, el.scrollTop / total)) : 0
 }
 
-/* ===== 代码块复制按钮 ===== */
-function setupCodeCopy() {
-  if (!import.meta.client) return
-  const root = document.querySelector('.article-content')
-  if (!root) return
-  root.querySelectorAll('pre').forEach((pre) => {
-    if (pre.querySelector('.code-copy-btn')) return
-    const btn = document.createElement('button')
-    btn.type = 'button'
-    btn.className = 'code-copy-btn'
-    btn.textContent = '复制'
-    btn.addEventListener('click', async () => {
-      const text = pre.querySelector('code')?.textContent ?? pre.textContent ?? ''
-      try {
-        await navigator.clipboard.writeText(text)
-        btn.textContent = '已复制 ✓'
-        btn.classList.add('copied')
-        setTimeout(() => {
-          btn.textContent = '复制'
-          btn.classList.remove('copied')
-        }, 2000)
-      } catch {
-        /* 忽略剪贴板权限错误 */
-      }
-    })
-    pre.appendChild(btn)
-  })
-}
+/* ===== 代码块语言标识 + 复制按钮（共享逻辑见 utils/codeblock.ts） ===== */
 
 /* ===== 阅读量上报（后端同日同 IP 去重） ===== */
 onMounted(() => {

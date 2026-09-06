@@ -421,11 +421,29 @@ html.dark .article-content .shiki span {
   transform: translateY(0);
 }
 
-/* ============ 代码块复制按钮（运行时注入） ============ */
-.code-copy-btn {
+/* ============ 代码块语言标识 + 复制按钮（运行时注入） ============ */
+/* 容器锚定右上角：语言 chip 常驻，复制按钮 hover 显现（占位不收缩，避免跳动） */
+.code-meta {
   position: absolute;
   top: 8px;
   right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.code-lang {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-family: var(--blog-font-mono);
+  color: var(--blog-muted-foreground);
+  background: var(--blog-card);
+  border: 1px solid var(--blog-border);
+  border-radius: var(--blog-radius-sm);
+  user-select: none;
+  pointer-events: none;
+}
+.code-copy-btn {
   padding: 4px 10px;
   font-size: 0.75rem;
   font-family: var(--blog-font-sans);
