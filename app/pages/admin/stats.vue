@@ -22,7 +22,8 @@ let chart: any = null
 
 onMounted(async () => {
   try {
-    const Chart = (await import(/* @vite-ignore */ 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js' as any)).default
+    // chart.js/auto 注册全部图表类型；npm 依赖随构建打包，无 CDN 失败/CSP 风险
+    const { default: Chart } = await import('chart.js/auto')
     const days = overview.value?.days ?? []
     const ctx = document.getElementById('pvChart') as HTMLCanvasElement | null
     if (!ctx || !Chart) return

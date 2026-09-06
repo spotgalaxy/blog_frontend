@@ -17,7 +17,7 @@ interface ApiEnvelope<T> {
   data: T
 }
 
-const { data: posts } = await useAsyncData('blog-list', async () => {
+const { data: posts, pending } = await useAsyncData('blog-list', async () => {
   const res = await $fetch<ApiEnvelope<Post[]>>('/api/posts')
   return res.data
 })
@@ -28,14 +28,31 @@ const allTags = computed(() => {
   return ['全部', ...set]
 })
 
-const activeTag = ref('全部')
+const route = useRoute()
+const activeTag = ref((route.query.tag as string) || '全部')
+const query = ref('')
 const page = ref(1)
 const pageSize = 8
 
+/** 站内搜索：标题/摘要/标签/正文任一命中即返回（客户端过滤，文章量级足够） */
+const matchesQuery = (post: Post) => {
+  const q = query.value.trim().toLowerCase()
+  if (!q) return true
+  const haystack = [
+    post.title,
+    post.summary,
+    ...(post.tags ?? []),
+    post.content ?? ''
+  ].join('\n').toLowerCase()
+  return haystack.includes(q)
+}
+
 const filtered = computed(() =>
-  activeTag.value === '全部'
-    ? (posts.value ?? [])
-    : (posts.value ?? []).filter((p) => p.tags?.includes(activeTag.value))
+  (posts.value ?? []).filter(
+    (p) =>
+      (activeTag.value === '全部' || p.tags?.includes(activeTag.value)) &&
+      matchesQuery(p)
+  )
 )
 
 const totalPages = computed(() =>
@@ -46,7 +63,7 @@ const paged = computed(() =>
   filtered.value.slice((page.value - 1) * pageSize, page.value * pageSize)
 )
 
-watch(activeTag, () => {
+watch([activeTag, query], () => {
   page.value = 1
 })
 
@@ -77,6 +94,17 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
       <div class="head-divider" />
     </header>
 
+    <!-- 站内搜索 -->
+    <section class="search-bar">
+      <input
+        v-model="query"
+        class="search-input"
+        type="search"
+        placeholder="搜索文章：标题 / 标签 / 正文…"
+        aria-label="搜索文章"
+      />
+    </section>
+
     <!-- 标签筛选 -->
     <section class="tag-filter">
       <button
@@ -88,10 +116,27 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
       >
         {{ tag }}
       </button>
+      <NuxtLink to="/tags" class="all-tags-link" aria-label="查看全部标签">全部标签 →</NuxtLink>
     </section>
 
     <!-- 文章列表 -->
     <main class="post-list">
+      <!-- 加载骨架屏（仅客户端导航时短暂出现，SSR 首屏直接渲染） -->
+      <template v-if="pending && !(posts ?? []).length">
+        <div v-for="i in 4" :key="'sk' + i" class="post skeleton" aria-hidden="true">
+          <div class="post-text">
+            <div class="sk-line w-30" />
+            <div class="sk-line w-80" />
+            <div class="sk-line w-95" />
+            <div class="sk-line w-50" />
+          </div>
+          <div class="post-cover sk-block" />
+        </div>
+      </template>
+      <p v-else-if="!(posts ?? []).length" class="post-summary">加载失败，请稍后刷新重试</p>
+      <p v-else-if="!filtered.length" class="post-summary">
+        没有匹配「{{ query }}」的文章，换个关键词试试
+      </p>
       <article v-for="(post, i) in paged" :key="post.slug" v-reveal="{ delay: i * 60 }" class="post">
         <NuxtLink :to="'/blog/' + post.slug" class="post-link">
           <div class="post-text">
@@ -191,6 +236,57 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
   margin: 0 auto;
 }
 
+/* ===== 站内搜索 ===== */
+.search-bar {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 16px;
+  border: 1px solid var(--blog-border);
+  border-radius: var(--blog-radius-sm);
+  background: var(--blog-card);
+  color: var(--blog-foreground);
+  font-size: 0.9rem;
+  font-family: var(--blog-font-sans);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--blog-primary);
+}
+
+/* ===== 骨架屏 ===== */
+.skeleton {
+  pointer-events: none;
+}
+.sk-line {
+  height: 14px;
+  border-radius: 6px;
+  background: var(--blog-border);
+  opacity: 0.55;
+  margin-bottom: 12px;
+  animation: sk-pulse 1.2s ease-in-out infinite;
+}
+.sk-line.w-30 { width: 30%; }
+.sk-line.w-80 { width: 80%; }
+.sk-line.w-95 { width: 95%; }
+.sk-line.w-50 { width: 50%; }
+.sk-block {
+  background: var(--blog-border);
+  opacity: 0.55;
+  animation: sk-pulse 1.2s ease-in-out infinite;
+}
+@keyframes sk-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.25; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-line, .sk-block { animation: none; }
+}
+
 /* ===== 标签筛选 ===== */
 .tag-filter {
   max-width: 36rem;
@@ -220,6 +316,16 @@ const minutes = (post: Post) => readingTime(post.content ?? '')
   color: var(--blog-primary);
   font-weight: 500;
   border-bottom-color: var(--blog-primary);
+}
+.all-tags-link {
+  font-size: 0.8rem;
+  color: var(--blog-muted-foreground);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s ease;
+}
+.all-tags-link:hover {
+  color: var(--blog-primary);
 }
 
 /* ===== 文章列表 ===== */

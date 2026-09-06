@@ -1,5 +1,11 @@
 <script setup lang="ts">
 const route = useRoute()
+const token = useCookie('blog_token')
+
+const logout = () => {
+  token.value = null
+  navigateTo('/admin/login')
+}
 
 const links = [
   { to: '/admin/posts', label: '文章管理', match: (p: string) => p.startsWith('/admin/posts') },
@@ -21,6 +27,7 @@ const links = [
     >
       {{ l.label }}
     </NuxtLink>
+    <button class="nav-item logout" type="button" @click="logout">登出</button>
   </nav>
 </template>
 
@@ -33,4 +40,6 @@ const links = [
 }
 .nav-item:hover { color: var(--blog-primary); }
 .nav-item.active { background: var(--blog-primary); color: #fff; border-color: transparent; }
+.logout { margin-left: auto; cursor: pointer; font-family: inherit; }
+.logout:hover { color: #b91c1c; border-color: #b91c1c; }
 </style>

@@ -61,9 +61,32 @@ watch(rendered, () => {
   if (import.meta.client) nextTick(setupCodeCopy)
 })
 
+/* ===== SEO：canonical / JSON-LD ===== */
+const siteUrl = useRuntimeConfig().public.siteUrl as string
+const pageUrl = `${siteUrl.replace(/\/$/, '')}/projects/${slug}`
+
 useHead({
   title: `${project.value.name} · 作品集 · spotgalaxy`,
-  meta: [{ name: 'description', content: project.value.summary }]
+  link: [{ rel: 'canonical', href: pageUrl }],
+  meta: [
+    { name: 'description', content: project.value.summary },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:url', content: pageUrl }
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'CreativeWork',
+        name: project.value.name,
+        description: project.value.summary,
+        ...(project.value.link ? { url: project.value.link } : {}),
+        author: { '@type': 'Person', name: site.name },
+        mainEntityOfPage: pageUrl
+      })
+    }
+  ]
 })
 </script>
 

@@ -10,11 +10,12 @@ useHead({
   ]
 })
 
-/* ===== 访客统计上报：路由变化即上报，后端写 visit_log ===== */
+/* ===== 访客统计上报：路由变化即上报，后端写 visit_log（后台管理页不计入） ===== */
 const route = useRoute()
 watch(
   () => route.fullPath,
   (path) => {
+    if (path.startsWith('/admin')) return
     $fetch('/api/stats/track', { method: 'POST', body: { path } }).catch(() => {})
   },
   { immediate: true }

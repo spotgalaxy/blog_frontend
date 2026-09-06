@@ -16,8 +16,8 @@ export function useTheme() {
     const dark = saved
       ? saved === 'dark'
       : window.matchMedia('(prefers-color-scheme: dark)').matches
+    // classList 已由 layout 的 head 内联脚本在首屏前处理，这里只同步切换图标的响应式状态
     isDark.value = dark
-    document.documentElement.classList.toggle('dark', dark)
   })
 
   return { isDark, toggle }

@@ -4,7 +4,11 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
 
   runtimeConfig: {
-    apiBase: process.env.API_BASE || 'http://localhost:8080'
+    apiBase: process.env.API_BASE || 'http://localhost:8080',
+    // 站点对外域名（rss/sitemap/canonical 用），部署到其他域名时用 SITE_URL 覆盖
+    public: {
+      siteUrl: process.env.SITE_URL || 'https://www.spotgalaxy.top'
+    }
   },
 
   modules: ['@nuxt/content'],
@@ -39,10 +43,12 @@ export default defineNuxtConfig({
         { property: 'og:type', content: 'website' },
         { property: 'og:site_name', content: 'spotgalaxy' },
         { property: 'og:title', content: 'spotgalaxy · 个人博客' },
+        { property: 'og:url', content: 'https://www.spotgalaxy.top' },
         {
           property: 'og:description',
           content: '关于技术、设计、阅读与生活的缓慢思考。'
-        }
+        },
+        { name: 'twitter:card', content: 'summary_large_image' }
       ],
       link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }]
     }
@@ -110,8 +116,9 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    // rss.xml / sitemap.xml 运行时动态生成，保证内容始终与库中数据同步
     prerender: {
-      routes: ['/rss.xml']
+      routes: []
     }
   }
 })
